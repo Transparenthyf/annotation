@@ -1,5 +1,5 @@
-import { toFixed3 } from '../method/commonMethod'
-import { setRectTransfrom, getRectCenterPoint } from '../method/annotationMethod'
+import { formatFloat } from '../method/commonMethod'
+import { setRectTransfrom, getRectCenterPoint, formatFloat } from '../method/annotationMethod'
 import { DrawShapePolygon } from '../constant/annotationConstant'
 
 let markId = 0
@@ -96,10 +96,10 @@ export class rectAttributeClass extends markAttributeClass {
 
     if (typeof rect !== 'undefined') {
       if (rect instanceof SVGElement) {
-        this.x = toFixed3(rect.getAttribute('x'))
-        this.y = toFixed3(rect.getAttribute('y'))
-        this.width = toFixed3(rect.getAttribute('width'))
-        this.height = toFixed3(rect.getAttribute('height'))
+        this.x = formatFloat(rect.getAttribute('x'), 3)
+        this.y = formatFloat(rect.getAttribute('y'), 3)
+        this.width = formatFloat(rect.getAttribute('width'), 3)
+        this.height = formatFloat(rect.getAttribute('height'), 3)
         this.transform = rect.getAttribute('transform')
       } else {
         this.x = rect.x
@@ -161,9 +161,9 @@ export class circleAttributeClass extends markAttributeClass {
 
     if (typeof circle !== 'undefined') {
       if (circle instanceof SVGElement) {
-        this.cx = toFixed3(circle.getAttribute('cx'))
-        this.cy = toFixed3(circle.getAttribute('cy'))
-        this.r = toFixed3(circle.getAttribute('r'))
+        this.cx = formatFloat(circle.getAttribute('cx'), 3)
+        this.cy = formatFloat(circle.getAttribute('cy'), 3)
+        this.r = formatFloat(circle.getAttribute('r'), 3)
       } else {
         this.cx = circle.cx
         this.cy = circle.cy
