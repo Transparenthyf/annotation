@@ -288,7 +288,6 @@ export function formatAnnotationInfo(annotationInfo: any, canvasType: string, la
       let markInfo = new markInfoClass(item.shape)
       let opacity = 0
       // 根据标记类型读取信息
-      let rightPoint = null
       switch (markInfo.shape) {
         case DrawShapePolygon:
           markInfo.markAttribute = new polygonAttributeClass(item.mark)
