@@ -155,7 +155,7 @@ async function loadImage() {
   let tmpImage = new Image()
   tmpImage.src = imageInfo.url
 
-  canvasRef.value.style.backgroundImage = imageInfo.url
+  canvasRef.value.style.backgroundImage = 'url(' + imageInfo.url + ')'
 
   await new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -265,6 +265,7 @@ onMounted(() => {
       padding: 0;
       #canvas {
         background-repeat: no-repeat;
+        background-size: cover;
       }
     }
   }
