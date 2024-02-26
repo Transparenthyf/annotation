@@ -1,17 +1,27 @@
-import { polygonAttributeClass, rectAttributeClass, circleAttributeClass } from './markAttributeClass'
+import {
+  polygonAttributeClass,
+  rectAttributeClass,
+  circleAttributeClass,
+  pathAttributeClass
+} from './markAttributeClass'
 
 /**
  * 标记文本属性类
  */
 export class markTextAttributeClass {
+  /** 标记 id */
+  name: number
+  /** 显示位置横坐标 */
+  x: number
+  /** 显示位置纵坐标 */
+  y: string
+  /** 字体颜色 */
+  fill: string
+
   constructor() {
-    /** 标记 id */
     this.name = -1
-    /** 显示位置横坐标 */
     this.x = -1
-    /** 显示位置纵坐标 */
     this.y = ''
-    /** 字体颜色 */
     this.fill = '#FF0000'
   }
 }
@@ -22,10 +32,13 @@ export class markTextAttributeClass {
  * @porperty markTextAttribute 标签属性
  */
 export class markTextClass {
+  /** 要显示的信息 */
+  message: string
+  /** 标签属性 */
+  markTextAttribute: markTextAttributeClass
+
   constructor() {
-    /** 要显示的信息 */
     this.message = ''
-    /** 标签属性 */
     this.markTextAttribute = new markTextAttributeClass()
   }
 }
@@ -38,20 +51,20 @@ export class markTextClass {
  * @porperty markText 标记文本信息
  */
 export class markInfoClass {
-  constructor(shape) {
-    /** 标记 id */
+  /** 标记 id */
+  name: number
+  /** 标记类型 */
+  shape: string
+  markAttribute: polygonAttributeClass | rectAttributeClass | circleAttributeClass | pathAttributeClass | null
+  markText: markTextClass[]
+  /**
+   * 标记属性
+   * @type {}
+   */
+  constructor(shape: string) {
     this.name = -1
-    /** 标记类型 */
     this.shape = shape
-    /**
-     * 标记属性
-     * @type {polygonAttributeClass | rectAttributeClass | circleAttributeClass}
-     */
     this.markAttribute = null
-    /**
-     * 标记文本信息
-     * @type {markTextClass[]}
-     */
     this.markText = []
   }
 }

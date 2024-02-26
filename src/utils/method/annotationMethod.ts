@@ -19,8 +19,8 @@ import {
 } from '../constant/annotationConstant'
 
 /** 格式化浮点数 */
-function formatFloat(number, places) {
-  return parseFloat(parseFloat(number).toFixed(places))
+export function formatFloat(number: number, places: number) {
+  return parseFloat(number.toFixed(places))
 }
 
 /**************************************计算标记面积******************************/
@@ -30,7 +30,7 @@ function formatFloat(number, places) {
  * @param points 多边形坐标的字符串形式 x,y x,y x,y ...
  * @param locationFlag 要显示在多边形的什么位置
  */
-export function getPolygonInfo(points, locationFlag) {
+export function getPolygonInfo(points: string, locationFlag: string) {
   // 记录多边形点坐标
   let pointsArray = []
   for (let tmpPoint of points.split(' ')) {
@@ -96,7 +96,7 @@ export function getPolygonInfo(points, locationFlag) {
     targetPoint.y += 23
   }
   return {
-    info: Math.abs(S.toFixed(2)),
+    info: Math.abs(formatFloat(S, 2)),
     x: formatFloat(targetPoint.x, 2),
     y: formatFloat(targetPoint.y, 2)
   }
@@ -106,7 +106,7 @@ export function getPolygonInfo(points, locationFlag) {
  * 将path中的d属性转为点
  *
  */
-function pathToPoints(pathData) {
+function pathToPoints(pathData: string) {
   let pointsArr = pathData
     .split(/([A-Za-z])/)
     .filter((s) => {
@@ -122,7 +122,7 @@ function pathToPoints(pathData) {
  * @param locationFlag 要显示在多边形的什么位置
  * @aram d path 的位置信息
  */
-export function getPathInfo(d, locationFlag) {
+export function getPathInfo(d: string, locationFlag: string) {
   //将d属性拆分，分别得到内圆和外圆
   let all = d.split('Z')
   all.pop()
@@ -184,7 +184,10 @@ export function getPathInfo(d, locationFlag) {
  * @param height 高
  * @param locationFlag 要显示在矩形的什么位置
  */
-export function getRectInfo(rectAttribute, locationFlag) {
+export function getRectInfo(
+  rectAttribute: { x: number; y: number; width: number; height: number },
+  locationFlag: string
+) {
   // 面积
   let S = rectAttribute.width * rectAttribute.height
   // 起始点坐标
@@ -204,7 +207,7 @@ export function getRectInfo(rectAttribute, locationFlag) {
   }
 
   return {
-    info: Math.abs(S.toFixed(2)),
+    info: Math.abs(formatFloat(S, 2)),
     x: formatFloat(targetPoint.x, 2),
     y: formatFloat(targetPoint.y, 2)
   }
@@ -215,7 +218,7 @@ export function getRectInfo(rectAttribute, locationFlag) {
 /** 获取画布标记信息
  *  * @param onlyChioce 是否只获取选中的标注信息
  */
-export function getMarkList(canvas, onlyChioce = false) {
+export function getMarkList(canvas: any, onlyChioce = false) {
   let markList = []
   for (const mark of canvas.childNodes) {
     // 跳过标记锚点
@@ -235,8 +238,11 @@ export function getMarkList(canvas, onlyChioce = false) {
       label: mark.getAttribute('label'),
       shape: mark.tagName,
       color: mark.getAttribute('color'),
-      mark: null,
-      cutMark: []
+      mark: null as any,
+      cutMark: [] as {
+        labelType: string
+        points: string
+      }[]
     }
 
     let tmpMarkAttribute = null
@@ -273,12 +279,10 @@ export function getMarkList(canvas, onlyChioce = false) {
 /**
  * 格式化标记信息,将数据库标记信息转化成可用形式
  * @param annotationInfo
- * @param canvas表示是哪一个画布上的元素，与元素的1type属性有关
+ * @param canvas 表示是哪一个画布上的元素，与元素的1type属性有关
  */
-export function formatAnnotationInfo(annotationInfo, canvasType, labelInfo = '', isAutoAnn = false) {
-  // console.log('从数据库中受到的标记', annotationInfo)
+export function formatAnnotationInfo(annotationInfo: any, canvasType: string, labelInfo = '', isAutoAnn = false) {
   let markInfoList = []
-  // console.log('3333:格式化之前的标记annotationInfo.markList ：', annotationInfo.markList)
   if (typeof annotationInfo.markList !== 'undefined') {
     for (const item of annotationInfo.markList) {
       let markInfo = new markInfoClass(item.shape)
@@ -290,21 +294,19 @@ export function formatAnnotationInfo(annotationInfo, canvasType, labelInfo = '',
           markInfo.markAttribute = new polygonAttributeClass(item.mark)
           //得到多边形的点并计算面积
           rightPoint = getPolygonInfo(item.mark.points, DirectionDown)
-          markInfo.area = rightPoint.info
           break
 
         case DrawShapeRect:
           markInfo.markAttribute = new rectAttributeClass(item.mark)
           rightPoint = getRectInfo(
             {
-              x: parseFloat(markInfo.markAttribute.x),
-              y: parseFloat(markInfo.markAttribute.y),
+              x: markInfo.markAttribute.x,
+              y: markInfo.markAttribute.y,
               width: markInfo.markAttribute.width,
               height: markInfo.markAttribute.height
             },
             DirectionDown
           )
-          markInfo.area = rightPoint.info
           break
 
         case DrawShapeCircle:
@@ -324,24 +326,19 @@ export function formatAnnotationInfo(annotationInfo, canvasType, labelInfo = '',
           }
           markInfo.markAttribute = new pathAttributeClass(pathInfo)
           rightPoint = getPathInfo(markInfo.markAttribute.d, DirectionDown)
-          markInfo.area = rightPoint.info
           break
       }
       if (markInfo.markAttribute !== null) {
         // 读取基本信息
-        markInfo.markAttribute.labelGroup = annotationInfo.labelGroup
         if (labelInfo !== '') {
           //给辅标结果添加标签名以及标签颜色
           markInfo.markAttribute.label = labelInfo.split('_')[0]
           markInfo.markAttribute.color = labelInfo.split('_')[1]
-          markInfo.markAttribute.style = getMarkStyle(labelInfo.split('_')[1], opacity)
+          markInfo.markAttribute.style = getMarkStyle(labelInfo.split('_')[1], opacity, '')
         } else {
           markInfo.markAttribute.label = item.label
           markInfo.markAttribute.color = item.color
-          markInfo.markAttribute.style = getMarkStyle(item.color, opacity)
-        }
-        if (item.mark.resultType !== undefined) {
-          markInfo.markAttribute.resultType = item.mark.resultType //将ok/NG/POK添加到属性身上
+          markInfo.markAttribute.style = getMarkStyle(item.color, opacity, '')
         }
         if (isAutoAnn) {
           //给辅助标注的标记添加type属性
@@ -362,163 +359,11 @@ export function formatAnnotationInfo(annotationInfo, canvasType, labelInfo = '',
   return markInfoList
 }
 
-/**格式化现场标记 */
-export function formatSpotAnnotationInfo(annotationInfo, canvasType) {
-  // console.log('进入了现场标记格式化函数传进来的annotationInfo：', annotationInfo)
-  let markInfoList = []
-  if (typeof annotationInfo.markList !== 'undefined') {
-    for (const item of annotationInfo.markList) {
-      //每一条标记信息
-      let markInfo = new markInfoClass(item.shape)
-      let opacity = 0
-      let rightPoint = null
-      if (markInfo.shape === 'text') {
-        //文本标记 只需要文本标记内容即可，显示在现场标记详情中
-        let textContent = `${item.mark.text}  level:${item.mark.level}`
-        markInfo.markText.push(textContent)
-        markInfoList.push(markInfo)
-      } else {
-        //显示标记
-        switch (markInfo.shape) {
-          case DrawShapePolygon:
-            markInfo.markAttribute = new polygonAttributeClass(item.mark)
-            markInfo.area = item.mark.realAreaWithMask
-            break
-          case DrawShapeRect:
-            markInfo.markAttribute = new rectAttributeClass(item.mark)
-            //矩形没有蒙版，所以使用计算的面积
-            rightPoint = getRectInfo(
-              {
-                x: parseFloat(markInfo.markAttribute.x),
-                y: parseFloat(markInfo.markAttribute.y),
-                width: markInfo.markAttribute.width,
-                height: markInfo.markAttribute.height
-              },
-              DirectionDown
-            )
-            markInfo.area = rightPoint.info
-            break
-          case DrawShapeCircle:
-            markInfo.markAttribute = new circleAttributeClass(item.mark)
-            markInfo.area = item.mark.realAreaWithMask
-            break
-          case DrawShapePath:
-            opacity = 0.1
-            let pathInfo = {
-              d: ''
-            }
-            pathInfo.d = polygonToPath(item.mark.points)
-            if (item.hasOwnProperty('cutMark') === true) {
-              for (const tmpMark of item.cutMark) {
-                pathInfo.d += ' ' + polygonToPath(tmpMark.points)
-              }
-            }
-            markInfo.markAttribute = new pathAttributeClass(pathInfo)
-            markInfo.area = item.mark.realAreaWithMask //将自带面积添加到属性身上
-            break
-        }
-
-        if (markInfo.markAttribute !== null) {
-          // 读取基本信息
-          markInfo.markAttribute.labelGroup = annotationInfo.labelGroup
-          markInfo.markAttribute.label = item.label
-          if (item.mark.resultType === 'UNKNOWN') {
-            markInfo.markAttribute.color = '#DCDCDC'
-            markInfo.markAttribute.style = getMarkStyle('#DCDCDC', opacity)
-          } else {
-            markInfo.markAttribute.color = item.color
-            markInfo.markAttribute.style = getMarkStyle(item.color, opacity)
-          }
-          markInfo.markAttribute.resultType = item.mark.resultType //将ok/NG/POK添加到属性身上
-          if (markInfo.shape !== DrawShapeRect) {
-            //矩形没有蒙版，所以使用自己计算的面积
-            markInfo.markAttribute.area = item.mark.realAreaWithMask
-          }
-          if (canvasType === 'otherImageRef') {
-            markInfo.markAttribute.type = 'otherImageMark'
-          }
-          markInfoList.push(markInfo)
-        }
-      }
-    }
-  }
-  if (typeof annotationInfo.maskList !== 'undefined') {
-    //显示蒙版
-    for (const item of annotationInfo.maskList) {
-      //每一条标记信息
-      let spotMarkInfo = new markInfoClass(item.shape)
-      let opacity = 0
-      switch (spotMarkInfo.shape) {
-        case DrawShapePolygon:
-          spotMarkInfo.markAttribute = new polygonAttributeClass(item.mark)
-          spotMarkInfo.area = item.mark.realAreaWithMask
-          break
-        case DrawShapeRect:
-          spotMarkInfo.markAttribute = new rectAttributeClass(item.mark)
-          rightPoint = getRectInfo(
-            {
-              x: parseFloat(spotMarkInfo.markAttribute.x),
-              y: parseFloat(spotMarkInfo.markAttribute.y),
-              width: spotMarkInfo.markAttribute.width,
-              height: spotMarkInfo.markAttribute.height
-            },
-            DirectionDown
-          )
-          spotMarkInfo.area = rightPoint.info
-          break
-        case DrawShapeCircle:
-          spotMarkInfo.markAttribute = new circleAttributeClass(item.mark)
-          spotMarkInfo.area = item.mark.realAreaWithMask
-          break
-        case DrawShapePath:
-          opacity = 0.1
-          let pathInfo = {
-            d: ''
-          }
-          pathInfo.d = polygonToPath(item.mark.points)
-          if (item.hasOwnProperty('cutMark') === true) {
-            for (const tmpMark of item.cutMark) {
-              pathInfo.d += ' ' + polygonToPath(tmpMark.points)
-            }
-          }
-          spotMarkInfo.markAttribute = new pathAttributeClass(pathInfo)
-          spotMarkInfo.area = item.mark.realAreaWithMask //将自带面积添加到属性身上
-          break
-        case 'text':
-          break
-      }
-      if (spotMarkInfo.markAttribute !== null) {
-        // 读取基本信息
-        spotMarkInfo.markAttribute.labelGroup = annotationInfo.labelGroup
-        spotMarkInfo.markAttribute.label = item.label
-        if (item.mark.resultType === 'UNKNOWN') {
-          spotMarkInfo.markAttribute.color = '#DCDCDC'
-          spotMarkInfo.markAttribute.style = getMarkStyle('#DCDCDC', opacity, 'stroke-dasharray:5,5')
-        } else {
-          spotMarkInfo.markAttribute.color = item.color
-          spotMarkInfo.markAttribute.style = getMarkStyle(item.color, opacity, 'stroke-dasharray:5,5')
-        }
-        spotMarkInfo.markAttribute.resultType = item.mark.resultType //将ok/NG/POK添加到属性身上
-        if (spotMarkInfo.shape !== DrawShapeRect) {
-          //矩形没有蒙版，所以使用自己计算的面积
-          spotMarkInfo.markAttribute.area = item.mark.realAreaWithMask
-        }
-        spotMarkInfo.markAttribute.level = item.mark.level
-        if (canvasType === 'otherImageRef') {
-          spotMarkInfo.markAttribute.type = 'otherImageMark'
-        }
-        markInfoList.push(spotMarkInfo)
-      }
-    }
-  }
-  return markInfoList
-}
-
 /**
  * 多边形转化为路径
  * @param points 多边形坐标点
  */
-export function polygonToPath(points) {
+export function polygonToPath(points: string) {
   let tmpPointsArray = points.split(' ')
   let tmpPoints = ''
   for (let i = 0; i <= tmpPointsArray.length; i++) {
@@ -534,7 +379,7 @@ export function polygonToPath(points) {
 }
 
 /** 求三个点的夹角 */
-export function getPolylineInfo(point1, point2, point3) {
+export function getPolylineInfo(point1: number[], point2: number[], point3: number[]) {
   // 角平分线角度
   let angle = 0
   // 两条边的角度
@@ -569,8 +414,8 @@ export function getPolylineInfo(point1, point2, point3) {
   angle += Math.PI / 2
 
   return {
-    x: parseInt(point2[0]),
-    y: parseInt(point2[1]),
+    x: point2[0],
+    y: point2[1],
     angle: angle
   }
 }
@@ -580,16 +425,16 @@ export function getPolylineInfo(point1, point2, point3) {
  * @param {*} drawMark 正在标注的标记
  * @returns
  */
-export function PolylineToPolygon(drawMark, polylineWidth) {
+export function PolylineToPolygon(drawMark: any, polylineWidth: number) {
   //获取多段线的所有点
   let points = drawMark.getAttribute('points').split(' ')
   // 计算每个点(与相邻两个点形成的角平分线)的角度
   let pointInfo = []
-  pointInfo.push(getPolylineInfo(null, points[0].split(','), points[1].split(',')))
+  pointInfo.push(getPolylineInfo([], points[0].split(','), points[1].split(',')))
   for (let i = 1; i < points.length - 1; i++) {
     pointInfo.push(getPolylineInfo(points[i - 1].split(','), points[i].split(','), points[i + 1].split(',')))
   }
-  pointInfo.push(getPolylineInfo(points.slice(-2)[0].split(','), points.slice(-1)[0].split(','), null))
+  pointInfo.push(getPolylineInfo(points.slice(-2)[0].split(','), points.slice(-1)[0].split(','), []))
 
   // 将多段线转换成多边形
   let polygonPoints = []
@@ -606,14 +451,15 @@ export function PolylineToPolygon(drawMark, polylineWidth) {
   }
 
   // 以上得到了多边形的所有点, 创建多边形的绘画标签并将其添加到画布上
-  polygonPoints = polygonPoints.join(' ')
-  let polygonAttribute = new polygonAttributeClass()
-  polygonAttribute.labelGroup = drawMark.getAttribute('labelGroup')
+  let polygonPointsString = polygonPoints.join(' ')
+  let polygonAttribute = new polygonAttributeClass(undefined)
   polygonAttribute.label = drawMark.getAttribute('label')
   polygonAttribute.color = drawMark.getAttribute('color')
   polygonAttribute.style = drawMark.getAttribute('style')
   let tempMark = makeMark(DrawShapePolygon, polygonAttribute)
-  tempMark.setAttribute('points', polygonPoints)
+  if (tempMark !== null) {
+    tempMark.setAttribute('points', polygonPointsString)
+  }
 
   return tempMark
 }
@@ -622,7 +468,7 @@ export function PolylineToPolygon(drawMark, polylineWidth) {
  * 计算矩形中心点
  * @param {rectAttributeClass} rectAttribute
  */
-export function getRectCenterPoint(rectAttribute) {
+export function getRectCenterPoint(rectAttribute: rectAttributeClass) {
   let centerPoint = {
     x: formatFloat(rectAttribute.x + rectAttribute.width / 2, 3),
     y: formatFloat(rectAttribute.y + rectAttribute.height / 2, 3)
@@ -634,7 +480,7 @@ export function getRectCenterPoint(rectAttribute) {
  * 获取旋转属性
  * @param rectElement 矩形元素
  */
-export function getRectTransform(rectElement) {
+export function getRectTransform(rectElement: any) {
   let transform = rectElement.getAttribute('transform')
   let angle = parseInt(transform.split('(')[1].split(',')[0])
   let centerPoint = {
@@ -652,14 +498,18 @@ export function getRectTransform(rectElement) {
  * @param angle 角度
  * @param centerPoint 中心点
  */
-export function setRectTransfrom(angle, centerPoint) {
+export function setRectTransfrom(angle: number, centerPoint: { x: number; y: number }) {
   return 'rotate(' + angle + ', ' + centerPoint.x + ', ' + centerPoint.y + ')'
 }
 
 /**
  * 计算 BC 与 AB 的夹角
  */
-export function getAngleFromThreePoint(pointA, pointB, pointC) {
+export function getAngleFromThreePoint(
+  pointA: { x: number; y: number },
+  pointB: { x: number; y: number },
+  pointC: { x: number; y: number }
+) {
   const ABX = pointA.x - pointB.x
   const ABY = pointA.y - pointB.y
   const CBX = pointC.x - pointB.x
@@ -676,7 +526,7 @@ export function getAngleFromThreePoint(pointA, pointB, pointC) {
  * 旋转点坐标
  * @param {number} angle
  */
-export function rotatePoint(point, centerPoint, angle) {
+export function rotatePoint(point: { x: number; y: number }, centerPoint: { x: number; y: number }, angle: number) {
   var a = centerPoint.x
   var b = centerPoint.y
   var x0 = point.x
@@ -688,41 +538,8 @@ export function rotatePoint(point, centerPoint, angle) {
 }
 
 /** 清理画布 */
-export function clearCanvas(canvas) {
+export function clearCanvas(canvas: Element) {
   canvas.innerHTML = ''
-}
-
-/**
- * 将图片以设定的宽度加载到画布上
- * @param url 图片地址
- * @param canvas 显示图片的画布
- */
-export async function onloadImage(url, canvas, imageWidth) {
-  try {
-    let image = new Image()
-    let imageRate = 0
-
-    image.src = url
-    canvas.style.backgroundImage = 'url("' + url + '")'
-    await new Promise((resolve, reject) => {
-      image.onload = () => {
-        imageRate = image.naturalHeight / image.naturalWidth
-        canvas.viewBox.baseVal.width = image.naturalWidth
-        canvas.viewBox.baseVal.height = image.naturalWidth * imageRate
-        canvas.width.baseVal.value = imageWidth
-        canvas.height.baseVal.value = imageWidth * imageRate
-        resolve()
-      }
-      image.onerror = (error) => {
-        console.log('error:', error)
-        image = null
-        reject()
-      }
-    })
-    return image
-  } catch (err) {
-    console.log('loadImage失败:', err)
-  }
 }
 
 /**
@@ -731,7 +548,7 @@ export async function onloadImage(url, canvas, imageWidth) {
  * @param fillOpacity 内部透明度
  * @param otherStyle 其他样式
  */
-export function getMarkStyle(color, fillOpacity, otherStyle) {
+export function getMarkStyle(color: string, fillOpacity: number, otherStyle: string) {
   let other = ''
   if (typeof otherStyle !== 'undefined') {
     other = otherStyle
@@ -744,7 +561,7 @@ export function getMarkStyle(color, fillOpacity, otherStyle) {
  * @param { DrawShapePolygon | DrawShapeRect | DrawShapeCircle } tag 标记的形状
  * @param { polygonAttributeClass | rectAttributeClass | circleAttributeClass } attrs 标记的属性
  */
-export function makeMark(tag, attrs) {
+export function makeMark(tag: string, attrs: any) {
   let el = null
   try {
     el = document.createElementNS('http://www.w3.org/2000/svg', tag)
@@ -785,7 +602,7 @@ export function makeMark(tag, attrs) {
 //   return array
 // }
 
-export function insertSortDesc(array, property) {
+export function insertSortDesc(array: any, property: string) {
   let hasText = false // 标记是否存在 'text' 元素
   for (let i = 1; i < array.length; i++) {
     for (let j = i; j > 0; j--) {
@@ -826,15 +643,15 @@ export function insertSortDesc(array, property) {
   }
   if (!hasText) {
     // 如果不存在 'text' 元素，对带有 area 的元素进行排序
-    array = array.filter((item) => item.area)
-    array.sort((a, b) => b.area - a.area)
+    array = array.filter((item: any) => item.area)
+    array.sort((a: any, b: any) => b.area - a.area)
   }
 
   return array
 }
 
 /** 交换数组中元素位置 */
-function arraySwap(arr, index1, index2) {
+function arraySwap(arr: any, index1: number, index2: number) {
   let temp = arr[index1]
   arr[index1] = arr[index2]
   arr[index2] = temp

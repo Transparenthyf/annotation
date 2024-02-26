@@ -1,5 +1,4 @@
-import { formatFloat } from '../method/commonMethod'
-import { setRectTransfrom, getRectCenterPoint, formatFloat } from '../method/annotationMethod'
+import { formatFloat } from '../method/annotationMethod'
 import { DrawShapePolygon } from '../constant/annotationConstant'
 
 let markId = 0
@@ -11,16 +10,22 @@ let markId = 0
  * @porperty style 标签属性
  */
 export class markAttributeClass {
+  /**name属性 用于删除面积*/
+  name: number
+  /** 标签 */
+  label: string
+  /** 标记颜色 */
+  color: string
+  /** 标签属性 */
+  style: string
+  /** 标记类型 */
+  type: string
+
   constructor() {
-    /**name属性 用于删除面积*/
     this.name = ++markId
-    /** 标签id */
     this.label = ''
-    /** 标记颜色 */
     this.color = ''
-    /** 标签属性 */
     this.style = ''
-    /** 标记类型 */
     this.type = 'mark'
   }
 }
@@ -33,17 +38,22 @@ export class markAttributeClass {
  * @porperty style 标签属性
  */
 export class polygonAttributeClass extends markAttributeClass {
+  /** 多边形点的集合 */
+  points: string
+
   /**
-   * @param {SVGElement|object|undefined} polygon 一个多边形元素或者多边形参数对象,为空表示使用默认值
+   * @param { undefined | SVGElement | object } polygon 一个多边形元素或者多边形参数对象,为空表示使用默认值
    */
-  constructor(polygon) {
+  constructor(polygon: undefined | SVGElement | { points: string }) {
     super()
-    /** 多边形点的集合 */
     this.points = ''
 
     if (typeof polygon !== 'undefined') {
       if (polygon instanceof SVGElement) {
-        this.points = polygon.getAttribute('points')
+        let tmpPoints = polygon.getAttribute('points')
+        if (tmpPoints !== null) {
+          this.points = tmpPoints
+        }
       } else {
         this.points = polygon.points
       }
@@ -78,40 +88,62 @@ export class polygonAttributeClass extends markAttributeClass {
  * @porperty style 标签属性
  */
 export class rectAttributeClass extends markAttributeClass {
+  /** 矩形左上角横坐标 */
+  x: number
+  /** 矩形左上角纵坐标 */
+  y: number
+  /** 宽 */
+  width: number
+  /** 高 */
+  height: number
+  /** 旋转 */
+  transform: string
+
   /**
-   * @param {SVGElement|object|undefined} rect 一个矩形元素或者多边形参数对象,为空表示使用默认值
+   * @param { undefined | SVGElement | object } rect 一个矩形元素或者多边形参数对象,为空表示使用默认值
    */
-  constructor(rect) {
+  constructor(
+    rect: undefined | SVGElement | { x: number; y: number; width: number; height: number; transform: string }
+  ) {
     super()
-    /** 矩形左上角横坐标 */
     this.x = 0
-    /** 矩形左上角纵坐标 */
     this.y = 0
-    /** 宽 */
     this.width = 0
-    /** 高 */
     this.height = 0
-    /** 旋转 */
     this.transform = 'rotate(0, 0, 0)'
 
     if (typeof rect !== 'undefined') {
       if (rect instanceof SVGElement) {
-        this.x = formatFloat(rect.getAttribute('x'), 3)
-        this.y = formatFloat(rect.getAttribute('y'), 3)
-        this.width = formatFloat(rect.getAttribute('width'), 3)
-        this.height = formatFloat(rect.getAttribute('height'), 3)
-        this.transform = rect.getAttribute('transform')
+        let tmpX = rect.getAttribute('x')
+        if (tmpX !== null) {
+          this.x = formatFloat(parseFloat(tmpX), 3)
+        }
+
+        let tmpY = rect.getAttribute('y')
+        if (tmpY !== null) {
+          this.y = formatFloat(parseFloat(tmpY), 3)
+        }
+
+        let tmpWidth = rect.getAttribute('width')
+        if (tmpWidth !== null) {
+          this.width = formatFloat(parseFloat(tmpWidth), 3)
+        }
+
+        let tmpHeight = rect.getAttribute('height')
+        if (tmpHeight !== null) {
+          this.height = formatFloat(parseFloat(tmpHeight), 3)
+        }
+
+        let tmpTransform = rect.getAttribute('transform')
+        if (tmpTransform !== null) {
+          this.transform = tmpTransform
+        }
       } else {
         this.x = rect.x
         this.y = rect.y
         this.width = rect.width
         this.height = rect.height
-        //防止返回的标记身上没有angel会报错
-        if (rect.angle !== undefined) {
-          this.transform = setRectTransfrom(rect.angle, getRectCenterPoint(this))
-        } else {
-          this.transform = setRectTransfrom(0, getRectCenterPoint(this))
-        }
+        this.transform = rect.transform
       }
     }
   }
@@ -147,23 +179,39 @@ export class rectAttributeClass extends markAttributeClass {
  * @porperty style 标签属性
  */
 export class circleAttributeClass extends markAttributeClass {
+  /** 圆心横坐标 */
+  cx: number
+  /** 圆心纵坐标 */
+  cy: number
+  /** 半径 */
+  r: number
+
   /**
-   * @param {SVGElement|object|undefined} circle 一个圆形元素或者圆形参数对象,为空表示使用默认值
+   * @param { undefined | SVGElement | object } circle 一个圆形元素或者圆形参数对象,为空表示使用默认值
    */
-  constructor(circle) {
+  constructor(circle: undefined | SVGElement | { cx: number; cy: number; r: number }) {
     super()
-    /** 圆心横坐标 */
+
     this.cx = 0
-    /** 圆心纵坐标 */
     this.cy = 0
-    /** 半径 */
     this.r = 0
 
     if (typeof circle !== 'undefined') {
       if (circle instanceof SVGElement) {
-        this.cx = formatFloat(circle.getAttribute('cx'), 3)
-        this.cy = formatFloat(circle.getAttribute('cy'), 3)
-        this.r = formatFloat(circle.getAttribute('r'), 3)
+        let tmpCx = circle.getAttribute('cx')
+        if (tmpCx !== null) {
+          this.cx = formatFloat(parseFloat(tmpCx), 3)
+        }
+
+        let tmpCy = circle.getAttribute('cy')
+        if (tmpCy !== null) {
+          this.cy = formatFloat(parseFloat(tmpCy), 3)
+        }
+
+        let tmpR = circle.getAttribute('r')
+        if (tmpR !== null) {
+          this.r = formatFloat(parseFloat(tmpR), 3)
+        }
       } else {
         this.cx = circle.cx
         this.cy = circle.cy
@@ -199,21 +247,25 @@ export class circleAttributeClass extends markAttributeClass {
  * @porperty style 标签属性
  */
 export class pathAttributeClass extends markAttributeClass {
+  /** 路径 */
+  d: string
+  /** 填充规则 */
+  'fill-rule': string
+
   /**
-   * @param {SVGElement|object|undefined} path 一个路径元素或者路径参数对象,为空表示使用默认值
+   * @param { undefined | SVGElement | object } path 一个路径元素或者路径参数对象,为空表示使用默认值
    */
-  constructor(path) {
+  constructor(path: undefined | SVGElement | { d: string }) {
     super()
-    /** 路径 */
     this.d = ''
     this['fill-rule'] = 'evenodd'
 
     if (typeof path !== 'undefined') {
       if (path instanceof SVGElement) {
-        this.d = path.getAttribute('d')
-        this.label = path.getAttribute('label')
-        this.color = path.getAttribute('color')
-        this.style = path.getAttribute('style')
+        let tmpD = path.getAttribute('d')
+        if (tmpD !== null) {
+          this.d = tmpD
+        }
       } else {
         this.d = path.d
       }
@@ -235,7 +287,10 @@ export class pathAttributeClass extends markAttributeClass {
       mark: {
         points: ''
       },
-      cutMark: []
+      cutMark: [] as {
+        labelType: string
+        points: string
+      }[]
     }
     let isLead = true
     for (const points of this.d.split('Z')) {
