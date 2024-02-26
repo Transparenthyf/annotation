@@ -73,8 +73,8 @@ function cancelDraw() {}
 onMounted(() => {
   console.log(canvasRef.value.style.backgroundImage)
   canvasRef.value.setAttribute('width', 1000)
-  canvasRef.value.setAttribute('height', 1000)
-  canvasRef.value.style.backgroundImage = 'url(http://localhost:3000/ImageRotate-66-1705398220572-4-7989.png)'
+  canvasRef.value.setAttribute('height', 500)
+  canvasRef.value.style.backgroundImage = 'url(http://localhost:2999/ImageCrop-131-1705397125719-6-7267.png)'
 })
 </script>
 
@@ -127,7 +127,7 @@ onMounted(() => {
 
 <style scoped lang="less">
 #annotationBox {
-  height: 100%;
+  height: calc(100% - 90px);
   #annotationHeader {
     display: flex;
     align-items: center;
@@ -155,6 +155,9 @@ onMounted(() => {
     }
     #annotationMain {
       padding: 0;
+      #canvas {
+        background-repeat: no-repeat;
+      }
     }
   }
 }
