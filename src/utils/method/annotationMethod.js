@@ -1,6 +1,3 @@
-// 方法
-import { showError, toFixed3 } from './commonMethod'
-
 // 类
 import {
   polygonAttributeClass,
@@ -27,6 +24,7 @@ function formatFloat(number, places) {
 }
 
 /**************************************计算标记面积******************************/
+
 /**
  * 计算多边形面积
  * @param points 多边形坐标的字符串形式 x,y x,y x,y ...
@@ -132,7 +130,7 @@ export function getPathInfo(d, locationFlag) {
   let outCircleArea = getPolygonInfo(outCirclePoints.join(''), DirectionRight).info
   let insideCirclePoints = pathToPoints(all[1]) //内圆所有的点
   let insideCircleArea = getPolygonInfo(insideCirclePoints.join(''), DirectionRight).info
-  let pathArea = toFixed3(outCircleArea - insideCircleArea)
+  let pathArea = formatFloat(outCircleArea - insideCircleArea, 3)
   // 显示位置的坐标 以内圆的坐标点计算
   // 记录多边形点坐标
   let pointsArray = []
@@ -213,6 +211,7 @@ export function getRectInfo(rectAttribute, locationFlag) {
 }
 
 /*********************************** 标注相关方法****************************************/
+
 /** 获取画布标记信息
  *  * @param onlyChioce 是否只获取选中的标注信息
  */
@@ -514,6 +513,7 @@ export function formatSpotAnnotationInfo(annotationInfo, canvasType) {
   }
   return markInfoList
 }
+
 /**
  * 多边形转化为路径
  * @param points 多边形坐标点
@@ -533,6 +533,7 @@ export function polygonToPath(points) {
   return tmpPoints
 }
 
+/** 求三个点的夹角 */
 export function getPolylineInfo(point1, point2, point3) {
   // 角平分线角度
   let angle = 0
@@ -573,6 +574,7 @@ export function getPolylineInfo(point1, point2, point3) {
     angle: angle
   }
 }
+
 /**
  *
  * @param {*} drawMark 正在标注的标记
@@ -622,8 +624,8 @@ export function PolylineToPolygon(drawMark, polylineWidth) {
  */
 export function getRectCenterPoint(rectAttribute) {
   let centerPoint = {
-    x: toFixed3(rectAttribute.x + rectAttribute.width / 2),
-    y: toFixed3(rectAttribute.y + rectAttribute.height / 2)
+    x: formatFloat(rectAttribute.x + rectAttribute.width / 2, 3),
+    y: formatFloat(rectAttribute.y + rectAttribute.height / 2, 3)
   }
   return centerPoint
 }
@@ -739,10 +741,9 @@ export function getMarkStyle(color, fillOpacity, otherStyle) {
 
 /**
  * 创建标记   这个函数传来的第一个参数表示标注的形状，第二个参数表示获取到的对应形状的参数，即坐标点、宽、高等
- * @param {DrawShapePolygon|DrawShapeRect|DrawShapeCircle} tag 标记的形状
- * @param {polygonAttributeClass|rectAttributeClass|circleAttributeClass} attrs 标记的属性
+ * @param { DrawShapePolygon | DrawShapeRect | DrawShapeCircle } tag 标记的形状
+ * @param { polygonAttributeClass | rectAttributeClass | circleAttributeClass } attrs 标记的属性
  */
-// document.createElementNS的第一个参数表示
 export function makeMark(tag, attrs) {
   let el = null
   try {
@@ -752,7 +753,7 @@ export function makeMark(tag, attrs) {
       el.setAttribute(k, attrs[k])
     }
   } catch (err) {
-    showError('创建标记失败')
+    console.log('创建标记失败')
   }
   return el
 }
@@ -764,7 +765,6 @@ export function makeMark(tag, attrs) {
  * @returns 排序后的数组
  */
 // export function insertSortDesc(array, property) {
-//   // console.log('55555进入了面积排序，面积排序前：', array, property)
 //   for (let i = 1; i < array.length; i++) {
 //     for (let j = i; j > 0; j--) {
 //       if (typeof property === 'undefined') {
@@ -782,7 +782,6 @@ export function makeMark(tag, attrs) {
 //       }
 //     }
 //   }
-//   // console.log('55555进入了面积排序，面积排序后：', array)
 //   return array
 // }
 
@@ -833,7 +832,8 @@ export function insertSortDesc(array, property) {
 
   return array
 }
-// 交换数组中元素位置
+
+/** 交换数组中元素位置 */
 function arraySwap(arr, index1, index2) {
   let temp = arr[index1]
   arr[index1] = arr[index2]
