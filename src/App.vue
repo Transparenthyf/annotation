@@ -92,7 +92,13 @@ const imageInfo = reactive({
 /** 画布信息 */
 const canvasInfo = reactive({
   /** 当前宽度 */
-  width: 800
+  width: 800,
+  /** 缩放比 */
+  zoomRatio: 1,
+  /** 滚动条上下偏移量 */
+  offsetTop: 0,
+  /** 滚动条左右偏移量 */
+  offsetLeft: 0
 })
 
 /** 光标信息 */
@@ -124,12 +130,20 @@ function mousemove(event: any) {
 
 /** 滚动条事件 */
 function canvasScroll(event: any) {
-  console.log('触发了滚动条事件', event)
+  canvasInfo.offsetTop = event.target.scrollTop
+  canvasInfo.offsetLeft = event.target.scrollLeft
 }
 
 /** 鼠标滚轮事件 */
 function canvasWheel(event: any) {
-  console.log('触发了鼠标滚轮事件', event)
+  if (canvasInfo.width > 300 || event.wheelDelta > 0) {
+    canvasInfo.width += event.wheelDelta / 5
+    canvasInfo.zoomRatio = imageInfo.naturalWidth / canvasInfo.width
+
+    // 修改画布大小
+    canvasRef.value.width.baseVal.value = canvasInfo.width
+    canvasRef.value.height.baseVal.value = formatFloat(canvasInfo.width * imageInfo.aspectRatio, 3)
+  }
 }
 
 /** 点击画布事件 */
