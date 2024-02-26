@@ -6,7 +6,6 @@ let markId = 0
 
 /**
  * 标记属性的基类
- * @porperty labelGroup 标签组id
  * @porperty label 标签id
  * @porperty color 标记颜色
  * @porperty style 标签属性
@@ -15,8 +14,6 @@ export class markAttributeClass {
   constructor() {
     /**name属性 用于删除面积*/
     this.name = ++markId
-    /** 标签组id */
-    this.labelGroup = ''
     /** 标签id */
     this.label = ''
     /** 标记颜色 */
@@ -31,7 +28,6 @@ export class markAttributeClass {
 /**
  * 多边形属性类
  * @porperty points 多边形点的集合
- * @porperty labelGroup 标签组id
  * @porperty label 标签id
  * @porperty color 标记颜色
  * @porperty style 标签属性
@@ -77,7 +73,6 @@ export class polygonAttributeClass extends markAttributeClass {
  * @porperty y 矩形左上角纵坐标
  * @porperty width 宽
  * @porperty height 高
- * @porperty labelGroup 标签组id
  * @porperty label 标签id
  * @porperty color 标记颜色
  * @porperty style 标签属性
@@ -147,7 +142,6 @@ export class rectAttributeClass extends markAttributeClass {
  * @porperty cx 圆心横坐标
  * @porperty cy 圆心纵坐标
  * @porperty r 半径
- * @porperty labelGroup 标签组id
  * @porperty label 标签id
  * @porperty color 标记颜色
  * @porperty style 标签属性
@@ -200,7 +194,6 @@ export class circleAttributeClass extends markAttributeClass {
 /**
  * 路径属性类
  * @porperty d 路径
- * @porperty labelGroup 标签组id
  * @porperty label 标签id
  * @porperty color 标记颜色
  * @porperty style 标签属性
@@ -218,7 +211,6 @@ export class pathAttributeClass extends markAttributeClass {
     if (typeof path !== 'undefined') {
       if (path instanceof SVGElement) {
         this.d = path.getAttribute('d')
-        this.labelGroup = path.getAttribute('labelGroup')
         this.label = path.getAttribute('label')
         this.color = path.getAttribute('color')
         this.style = path.getAttribute('style')

@@ -1,8 +1,5 @@
 import { polygonAttributeClass, rectAttributeClass, circleAttributeClass } from './markAttributeClass'
 
-/** 标记 id ，用来查找标记相关的信息 */
-let markId = 0
-
 /**
  * 标记文本属性类
  */
