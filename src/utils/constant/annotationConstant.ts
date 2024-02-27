@@ -20,7 +20,7 @@ export const DrawStateCuting = '裁剪中'
 
 /** 标注形状 */
 /** 多段线 */
-export const DrawShapePolyLine = 'polyline'
+export const DrawShapePolyline = 'polyline'
 /** 多边形 */
 export const DrawShapePolygon = 'polygon'
 /** 矩形 */
