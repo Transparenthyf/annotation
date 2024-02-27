@@ -1,4 +1,3 @@
-import { formatFloat } from '../method/annotationMethod'
 import { DrawShapePolygon } from '../constant/annotationConstant'
 
 let markId = 0
@@ -44,18 +43,21 @@ export class polygonAttributeClass extends markAttributeClass {
   /**
    * @param { SVGElement | object } polygon 一个多边形元素或者多边形参数对象,为空表示使用默认值
    */
-  constructor(polygon?: SVGElement | { points: string }) {
+  constructor(polygon?: SVGElement | polygonAttributeClass) {
     super()
     this.points = ''
 
     if (typeof polygon !== 'undefined') {
       if (polygon instanceof SVGElement) {
-        let tmpPoints = polygon.getAttribute('points')
-        if (tmpPoints !== null) {
-          this.points = tmpPoints
-        }
+        this.points = polygon.getAttribute('points') || this.label
+        this.label = polygon.getAttribute('label') || this.label
+        this.color = polygon.getAttribute('color') || this.color
+        this.style = polygon.getAttribute('style') || this.style
       } else {
         this.points = polygon.points
+        this.label = polygon.label
+        this.color = polygon.color
+        this.style = polygon.style
       }
     }
   }
@@ -102,7 +104,7 @@ export class rectAttributeClass extends markAttributeClass {
   /**
    * @param { SVGElement | object } rect 一个矩形元素或者多边形参数对象,为空表示使用默认值
    */
-  constructor(rect?: SVGElement | { x: number; y: number; width: number; height: number; transform: string }) {
+  constructor(rect?: SVGElement | rectAttributeClass) {
     super()
     this.x = 0
     this.y = 0
@@ -112,36 +114,22 @@ export class rectAttributeClass extends markAttributeClass {
 
     if (typeof rect !== 'undefined') {
       if (rect instanceof SVGElement) {
-        let tmpX = rect.getAttribute('x')
-        if (tmpX !== null) {
-          this.x = formatFloat(parseFloat(tmpX), 3)
-        }
-
-        let tmpY = rect.getAttribute('y')
-        if (tmpY !== null) {
-          this.y = formatFloat(parseFloat(tmpY), 3)
-        }
-
-        let tmpWidth = rect.getAttribute('width')
-        if (tmpWidth !== null) {
-          this.width = formatFloat(parseFloat(tmpWidth), 3)
-        }
-
-        let tmpHeight = rect.getAttribute('height')
-        if (tmpHeight !== null) {
-          this.height = formatFloat(parseFloat(tmpHeight), 3)
-        }
-
-        let tmpTransform = rect.getAttribute('transform')
-        if (tmpTransform !== null) {
-          this.transform = tmpTransform
-        }
+        this.x = Number(rect.getAttribute('x') || this.x)
+        this.y = Number(rect.getAttribute('y') || this.y)
+        this.width = Number(rect.getAttribute('width') || this.width)
+        this.height = Number(rect.getAttribute('height') || this.height)
+        this.label = rect.getAttribute('label') || this.label
+        this.color = rect.getAttribute('color') || this.color
+        this.style = rect.getAttribute('style') || this.style
       } else {
         this.x = rect.x
         this.y = rect.y
         this.width = rect.width
         this.height = rect.height
         this.transform = rect.transform
+        this.label = rect.label
+        this.color = rect.color
+        this.style = rect.style
       }
     }
   }
@@ -187,7 +175,7 @@ export class circleAttributeClass extends markAttributeClass {
   /**
    * @param { SVGElement | object } circle 一个圆形元素或者圆形参数对象,为空表示使用默认值
    */
-  constructor(circle?: SVGElement | { cx: number; cy: number; r: number }) {
+  constructor(circle?: SVGElement | circleAttributeClass) {
     super()
 
     this.cx = 0
@@ -196,24 +184,19 @@ export class circleAttributeClass extends markAttributeClass {
 
     if (typeof circle !== 'undefined') {
       if (circle instanceof SVGElement) {
-        let tmpCx = circle.getAttribute('cx')
-        if (tmpCx !== null) {
-          this.cx = formatFloat(parseFloat(tmpCx), 3)
-        }
-
-        let tmpCy = circle.getAttribute('cy')
-        if (tmpCy !== null) {
-          this.cy = formatFloat(parseFloat(tmpCy), 3)
-        }
-
-        let tmpR = circle.getAttribute('r')
-        if (tmpR !== null) {
-          this.r = formatFloat(parseFloat(tmpR), 3)
-        }
+        this.cx = Number(circle.getAttribute('cx') || this.cx)
+        this.cy = Number(circle.getAttribute('cy') || this.cy)
+        this.r = Number(circle.getAttribute('r') || this.r)
+        this.label = circle.getAttribute('label') || this.label
+        this.color = circle.getAttribute('color') || this.color
+        this.style = circle.getAttribute('style') || this.style
       } else {
         this.cx = circle.cx
         this.cy = circle.cy
         this.r = circle.r
+        this.label = circle.label
+        this.color = circle.color
+        this.style = circle.style
       }
     }
   }
@@ -253,19 +236,22 @@ export class pathAttributeClass extends markAttributeClass {
   /**
    * @param { SVGElement | object } path 一个路径元素或者路径参数对象,为空表示使用默认值
    */
-  constructor(path?: SVGElement | { d: string }) {
+  constructor(path?: SVGElement | pathAttributeClass) {
     super()
     this.d = ''
     this['fill-rule'] = 'evenodd'
 
     if (typeof path !== 'undefined') {
       if (path instanceof SVGElement) {
-        let tmpD = path.getAttribute('d')
-        if (tmpD !== null) {
-          this.d = tmpD
-        }
+        this.d = path.getAttribute('d') || this.d
+        this.label = path.getAttribute('label') || this.label
+        this.color = path.getAttribute('color') || this.color
+        this.style = path.getAttribute('style') || this.style
       } else {
         this.d = path.d
+        this.label = path.label
+        this.color = path.color
+        this.style = path.style
       }
     }
   }

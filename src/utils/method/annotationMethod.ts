@@ -315,16 +315,15 @@ export function formatAnnotationInfo(annotationInfo: any, canvasType: string, la
 
         case DrawShapePath:
           opacity = 0.1
-          let pathInfo = {
-            d: ''
-          }
-          pathInfo.d = polygonToPath(item.mark.points)
+          let d = ''
+          d = polygonToPath(item.mark.points)
           if (item.hasOwnProperty('cutMark') === true) {
             for (const tmpMark of item.cutMark) {
-              pathInfo.d += ' ' + polygonToPath(tmpMark.points)
+              d += ' ' + polygonToPath(tmpMark.points)
             }
           }
-          markInfo.markAttribute = new pathAttributeClass(pathInfo)
+          markInfo.markAttribute = new pathAttributeClass()
+          markInfo.markAttribute.d = d
           // rightPoint = getPathInfo(markInfo.markAttribute.d, DirectionDown)
           break
       }
@@ -379,23 +378,23 @@ export function polygonToPath(points: string) {
 }
 
 /** 求三个点的夹角 */
-export function getPolylineInfo(point1: number[], point2: number[], point3: number[]) {
+export function getPolylineInfo(point1: number[] | null, point2: number[], point3: number[] | null) {
   // 角平分线角度
   let angle = 0
   // 两条边的角度
   let a = 0
   let b = 0
-  if (point1 === null) {
+  if (point1 === null && point3 !== null) {
     angle = Math.atan2(point3[1] - point2[1], point3[0] - point2[0])
     if (angle < 0) {
       angle += 2 * Math.PI
     }
-  } else if (point3 === null) {
+  } else if (point3 === null && point1 !== null) {
     angle = Math.atan2(point2[1] - point1[1], point2[0] - point1[0])
     if (angle < 0) {
       angle += 2 * Math.PI
     }
-  } else {
+  } else if (point1 !== null && point3 !== null) {
     a = Math.atan2(point2[1] - point1[1], point2[0] - point1[0])
     b = Math.atan2(point3[1] - point2[1], point3[0] - point2[0])
     if (a < 0) {
@@ -422,19 +421,34 @@ export function getPolylineInfo(point1: number[], point2: number[], point3: numb
 
 /**
  *
- * @param {*} drawMark 正在标注的标记
+ * @param drawMark 正在标注的标记
  * @returns
  */
-export function PolylineToPolygon(drawMark: any, polylineWidth: number) {
+export function PolylineToPolygon(drawMark: SVGElement, polylineWidth: number) {
   //获取多段线的所有点
-  let points = drawMark.getAttribute('points').split(' ')
-  // 计算每个点(与相邻两个点形成的角平分线)的角度
-  let pointInfo = []
-  pointInfo.push(getPolylineInfo([], points[0].split(','), points[1].split(',')))
-  for (let i = 1; i < points.length - 1; i++) {
-    pointInfo.push(getPolylineInfo(points[i - 1].split(','), points[i].split(','), points[i + 1].split(',')))
+  let tmpPoints = drawMark.getAttribute('points')
+  let pointsString = [] as string[]
+  if (tmpPoints !== null) {
+    pointsString = tmpPoints.split(' ')
   }
-  pointInfo.push(getPolylineInfo(points.slice(-2)[0].split(','), points.slice(-1)[0].split(','), []))
+
+  // 转化为数字格式
+  let pointsNumber = [] as number[][]
+  for (const point of pointsString) {
+    pointsNumber.push(point.split(',').map((item) => Number(item)))
+  }
+
+  // 计算每个点(与相邻两个点形成的角平分线)的角度
+  let pointInfo = [] as {
+    x: number
+    y: number
+    angle: number
+  }[]
+  pointInfo.push(getPolylineInfo(null, pointsNumber[0], pointsNumber[1]))
+  for (let i = 1; i < pointsNumber.length - 1; i++) {
+    pointInfo.push(getPolylineInfo(pointsNumber[i - 1], pointsNumber[i], pointsNumber[i + 1]))
+  }
+  pointInfo.push(getPolylineInfo(pointsNumber.slice(-2)[0], pointsNumber.slice(-1)[0], null))
 
   // 将多段线转换成多边形
   let polygonPoints = []
@@ -453,9 +467,19 @@ export function PolylineToPolygon(drawMark: any, polylineWidth: number) {
   // 以上得到了多边形的所有点, 创建多边形的绘画标签并将其添加到画布上
   let polygonPointsString = polygonPoints.join(' ')
   let polygonAttribute = new polygonAttributeClass()
-  polygonAttribute.label = drawMark.getAttribute('label')
-  polygonAttribute.color = drawMark.getAttribute('color')
-  polygonAttribute.style = drawMark.getAttribute('style')
+  let tmpLabel = drawMark.getAttribute('label')
+  if (tmpLabel !== null) {
+    polygonAttribute.label = tmpLabel
+  }
+  let tmpColor = drawMark.getAttribute('color')
+  if (tmpColor !== null) {
+    polygonAttribute.color = tmpColor
+  }
+  let tmpStyle = drawMark.getAttribute('style')
+  if (tmpStyle !== null) {
+    polygonAttribute.style = tmpStyle
+  }
+
   let tempMark = makeMark(DrawShapePolygon, polygonAttribute)
   if (tempMark !== null) {
     tempMark.setAttribute('points', polygonPointsString)
@@ -463,6 +487,113 @@ export function PolylineToPolygon(drawMark: any, polylineWidth: number) {
 
   return tempMark
 }
+
+/**
+ * 三个点转化成圆
+ * @param polygon 多边形元素
+ */
+export function threePointsToCircle(polygonSVG: SVGElement) {
+  let polygon = new polygonAttributeClass(polygonSVG) //得到svg标签的一些属性
+  let pointsArray = []
+  //遍历多边形标签中的每个点
+  for (const pointString of polygon.points.split(' ')) {
+    let pointArray = pointString.split(',').map((item) => Number(item))
+    pointsArray.push([formatFloat(pointArray[0], 2), formatFloat(pointArray[1], 2)])
+  }
+
+  let a = pointsArray[0][0] - pointsArray[1][0]
+  let b = pointsArray[0][1] - pointsArray[1][1]
+  let c = pointsArray[0][0] - pointsArray[2][0]
+  let d = pointsArray[0][1] - pointsArray[2][1]
+  let e =
+    (Math.pow(pointsArray[0][0], 2) -
+      Math.pow(pointsArray[1][0], 2) -
+      (Math.pow(pointsArray[1][1], 2) - Math.pow(pointsArray[0][1], 2))) /
+    2
+  let f =
+    (Math.pow(pointsArray[0][0], 2) -
+      Math.pow(pointsArray[2][0], 2) -
+      (Math.pow(pointsArray[2][1], 2) - Math.pow(pointsArray[0][1], 2))) /
+    2
+
+  let circle = new circleAttributeClass()
+  circle.cx = formatFloat((e * d - b * f) / (a * d - b * c), 2)
+  circle.cy = formatFloat((a * f - e * c) / (a * d - b * c), 2)
+  circle.r = Math.sqrt(Math.pow(circle.cx - pointsArray[0][0], 2) + Math.pow(circle.cy - pointsArray[0][1], 2))
+  circle.label = polygon.label
+  circle.color = polygon.color
+  circle.style = polygon.style
+
+  return makeMark(DrawShapeCircle, circle)
+}
+
+/**
+ * 将圆转化成多边形
+ * @param circleSVG 圆形元素
+ */
+export function circleToPolygon(circleSVG: SVGElement) {
+  //传入的是三点成圆函数得到的圆形svg标签
+  let circle = new circleAttributeClass(circleSVG)
+  let r = circle.r
+  let cx = circle.cx
+  let cy = circle.cy
+  let numberOfPoints = r
+  //控制圆显示的点的个数
+  if (numberOfPoints > 50) {
+    numberOfPoints = numberOfPoints - numberOfPoints / 2
+  } else if (numberOfPoints > 20) {
+    numberOfPoints = numberOfPoints - 10
+  }
+  let points = cx + r + ',' + cy
+  for (let i = 1; i < numberOfPoints; i++) {
+    let angle = (i * 2 * Math.PI) / numberOfPoints
+    let x = formatFloat(cx + r * Math.cos(angle), 2)
+    let y = formatFloat(cy - r * Math.sin(angle), 2)
+    points += ' ' + x + ',' + y
+  }
+  let polygon = new polygonAttributeClass()
+  polygon.points = points
+  polygon.label = circle.label
+  polygon.color = circle.color
+  polygon.style = circle.style
+
+  return makeMark(DrawShapePolygon, polygon)
+}
+
+// /**
+//  * 格式化界面标记
+//  * @param svg svg 标签
+//  */
+// function getInterfaceMarkInfo(svg: SVGElement) {
+//   let tmpMarkInfo = null
+
+//   // 位置
+//   switch (svg.tagName) {
+//     case DrawShapePolygon:
+//       tmpMarkInfo = new polygonAttributeClass(svg)
+//       break
+
+//     case DrawShapeRect:
+//       tmpMarkInfo = new rectAttributeClass(svg)
+//       break
+
+//     case DrawShapeCircle:
+//       tmpMarkInfo = new circleAttributeClass(svg)
+//       break
+
+//     case DrawShapePath:
+//       tmpMarkInfo = new pathAttributeClass(svg)
+//       break
+//   }
+
+//   if (tmpMarkInfo !== null) {
+//     tmpMarkInfo.label = svg.getAttribute('label') || tmpMarkInfo.label
+//     tmpMarkInfo.color = svg.getAttribute('color') || tmpMarkInfo.color
+//     tmpMarkInfo.style = svg.getAttribute('style') || tmpMarkInfo.style
+//   }
+
+//   return tmpMarkInfo
+// }
 
 /**
  * 计算矩形中心点
@@ -562,15 +693,10 @@ export function getMarkStyle(color: string, fillOpacity: number, otherStyle?: st
  * @param { polygonAttributeClass | rectAttributeClass | circleAttributeClass } attrs 标记的属性
  */
 export function makeMark(tag: string, attrs: any) {
-  let el = null
-  try {
-    el = document.createElementNS('http://www.w3.org/2000/svg', tag)
-    // 给标签增加属性
-    for (var k in attrs) {
-      el.setAttribute(k, attrs[k])
-    }
-  } catch (err) {
-    console.log('创建标记失败')
+  let el = document.createElementNS('http://www.w3.org/2000/svg', tag)
+  // 给标签增加属性
+  for (var k in attrs) {
+    el.setAttribute(k, attrs[k])
   }
   return el
 }
