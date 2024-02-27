@@ -139,7 +139,7 @@ const assist = reactive({
 /** 图片信息 */
 const imageInfo = reactive({
   /** 图片链接 */
-  url: 'http://localhost:2999/ImageCrop-131-1705397125719-6-7267.png',
+  url: 'https://annotation.transparenthyf.cc//ImageCrop-131-1705397125719-6-7267.png',
   /** 原始宽度 */
   naturalWidth: 0,
   /** 原始高度 */
