@@ -44,7 +44,7 @@ export class polygonAttributeClass extends markAttributeClass {
   /**
    * @param { undefined | SVGElement | object } polygon 一个多边形元素或者多边形参数对象,为空表示使用默认值
    */
-  constructor(polygon: undefined | SVGElement | { points: string }) {
+  constructor(polygon?: undefined | SVGElement | { points: string }) {
     super()
     this.points = ''
 
@@ -103,7 +103,7 @@ export class rectAttributeClass extends markAttributeClass {
    * @param { undefined | SVGElement | object } rect 一个矩形元素或者多边形参数对象,为空表示使用默认值
    */
   constructor(
-    rect: undefined | SVGElement | { x: number; y: number; width: number; height: number; transform: string }
+    rect?: undefined | SVGElement | { x: number; y: number; width: number; height: number; transform: string }
   ) {
     super()
     this.x = 0
@@ -189,7 +189,7 @@ export class circleAttributeClass extends markAttributeClass {
   /**
    * @param { undefined | SVGElement | object } circle 一个圆形元素或者圆形参数对象,为空表示使用默认值
    */
-  constructor(circle: undefined | SVGElement | { cx: number; cy: number; r: number }) {
+  constructor(circle?: undefined | SVGElement | { cx: number; cy: number; r: number }) {
     super()
 
     this.cx = 0
@@ -255,7 +255,7 @@ export class pathAttributeClass extends markAttributeClass {
   /**
    * @param { undefined | SVGElement | object } path 一个路径元素或者路径参数对象,为空表示使用默认值
    */
-  constructor(path: undefined | SVGElement | { d: string }) {
+  constructor(path?: undefined | SVGElement | { d: string }) {
     super()
     this.d = ''
     this['fill-rule'] = 'evenodd'

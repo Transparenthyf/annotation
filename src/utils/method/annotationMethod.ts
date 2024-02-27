@@ -287,6 +287,7 @@ export function formatAnnotationInfo(annotationInfo: any, canvasType: string, la
     for (const item of annotationInfo.markList) {
       let markInfo = new markInfoClass(item.shape)
       let opacity = 0
+      let rightPoint = {}
       // 根据标记类型读取信息
       switch (markInfo.shape) {
         case DrawShapePolygon:
@@ -451,7 +452,7 @@ export function PolylineToPolygon(drawMark: any, polylineWidth: number) {
 
   // 以上得到了多边形的所有点, 创建多边形的绘画标签并将其添加到画布上
   let polygonPointsString = polygonPoints.join(' ')
-  let polygonAttribute = new polygonAttributeClass(undefined)
+  let polygonAttribute = new polygonAttributeClass()
   polygonAttribute.label = drawMark.getAttribute('label')
   polygonAttribute.color = drawMark.getAttribute('color')
   polygonAttribute.style = drawMark.getAttribute('style')
