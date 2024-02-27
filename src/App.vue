@@ -75,8 +75,6 @@ const view = reactive({
       color: '#00FF00'
     }
   ] as label[],
-  /** 选择的标签 */
-  selectedLabel: {} as label,
   /** 标记形状 */
   drawShape: [
     {
@@ -180,12 +178,17 @@ const cursorInfo = reactive({
 function selectLabel(labelName: string) {
   for (const label of view.labelList) {
     if (label.name === labelName) {
-      view.selectedLabel = label
       draw.label = label.name
       draw.color = label.color
+      cancelDraw()
       changeDrawState(DrawStateReady)
     }
   }
+}
+
+/** 选择形状 */
+function selectShape() {
+  cancelDraw()
 }
 
 // **************************** 监听浏览器事件 ****************************
@@ -519,9 +522,9 @@ function getMarkAttribute(shape: string) {
       break
   }
   if (attribute !== null) {
-    attribute.label = view.selectedLabel.name
-    attribute.color = view.selectedLabel.color
-    attribute.style = getMarkStyle(view.selectedLabel.color, 0)
+    attribute.label = draw.label
+    attribute.color = draw.color
+    attribute.style = getMarkStyle(draw.color, 0)
   }
 
   return attribute
@@ -578,7 +581,7 @@ onMounted(() => {
     <el-header id="statusBar">
       <span>当前状态：{{ draw.state }}</span>
       <el-radio-group v-model="draw.shape" size="small">
-        <el-radio border v-for="item in view.drawShape" :key="item.shape" :label="item.shape">
+        <el-radio border v-for="item in view.drawShape" :key="item.shape" :label="item.shape" @change="selectShape">
           {{ item.displayName }}
         </el-radio>
       </el-radio-group>
@@ -587,7 +590,7 @@ onMounted(() => {
       <!-- 主体的左侧区域 标签组部分-->
       <el-aside id="labelSide">
         <!-- 左侧标签部分 -->
-        <el-radio-group v-model="view.selectedLabel.name" size="small">
+        <el-radio-group v-model="draw.label" size="small">
           <el-radio
             border
             v-for="label in view.labelList"
