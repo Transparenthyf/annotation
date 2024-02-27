@@ -55,7 +55,9 @@ export class markInfoClass {
   name: number
   /** 标记类型 */
   shape: string
+  /** 标记属性 */
   markAttribute: polygonAttributeClass | rectAttributeClass | circleAttributeClass | pathAttributeClass | null
+  /** 标记文本 */
   markText: markTextClass[]
   /**
    * 标记属性
