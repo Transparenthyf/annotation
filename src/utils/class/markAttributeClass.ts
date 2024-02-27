@@ -310,5 +310,3 @@ export class pathAttributeClass extends markAttributeClass {
     return uploadInfo
   }
 }
-
-//在这里添加一个文本标记的类（类似于多边形等）
