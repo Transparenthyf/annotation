@@ -548,7 +548,7 @@ export function clearCanvas(canvas: Element) {
  * @param fillOpacity 内部透明度
  * @param otherStyle 其他样式
  */
-export function getMarkStyle(color: string, fillOpacity: number, otherStyle: string) {
+export function getMarkStyle(color: string, fillOpacity: number, otherStyle?: string) {
   let other = ''
   if (typeof otherStyle !== 'undefined') {
     other = otherStyle
