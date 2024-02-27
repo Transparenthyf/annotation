@@ -287,26 +287,26 @@ export function formatAnnotationInfo(annotationInfo: any, canvasType: string, la
     for (const item of annotationInfo.markList) {
       let markInfo = new markInfoClass(item.shape)
       let opacity = 0
-      let rightPoint = {}
+      // let rightPoint = {}
       // 根据标记类型读取信息
       switch (markInfo.shape) {
         case DrawShapePolygon:
           markInfo.markAttribute = new polygonAttributeClass(item.mark)
           //得到多边形的点并计算面积
-          rightPoint = getPolygonInfo(item.mark.points, DirectionDown)
+          // rightPoint = getPolygonInfo(item.mark.points, DirectionDown)
           break
 
         case DrawShapeRect:
           markInfo.markAttribute = new rectAttributeClass(item.mark)
-          rightPoint = getRectInfo(
-            {
-              x: markInfo.markAttribute.x,
-              y: markInfo.markAttribute.y,
-              width: markInfo.markAttribute.width,
-              height: markInfo.markAttribute.height
-            },
-            DirectionDown
-          )
+          // rightPoint = getRectInfo(
+          //   {
+          //     x: markInfo.markAttribute.x,
+          //     y: markInfo.markAttribute.y,
+          //     width: markInfo.markAttribute.width,
+          //     height: markInfo.markAttribute.height
+          //   },
+          //   DirectionDown
+          // )
           break
 
         case DrawShapeCircle:
@@ -325,7 +325,7 @@ export function formatAnnotationInfo(annotationInfo: any, canvasType: string, la
             }
           }
           markInfo.markAttribute = new pathAttributeClass(pathInfo)
-          rightPoint = getPathInfo(markInfo.markAttribute.d, DirectionDown)
+          // rightPoint = getPathInfo(markInfo.markAttribute.d, DirectionDown)
           break
       }
       if (markInfo.markAttribute !== null) {
